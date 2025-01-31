@@ -72,12 +72,14 @@
     </style>
 </head>
 <body>
- 
-    <div class="subscribe-container">
-         <h2>Subscribe to Unlock the Quiz!</h2>
-        <a class="subscribe-button" href="https://www.youtube.com/channel/UCqdICzheBUg6W7DyOYQamJA" target="_blank">Subscribe on YouTube</a>
+    <div class="subscribe-container" id="subscribe-container">
+        <h2>Subscribe to Unlock the Quiz!</h2>
+        <p>Subscribe to our YouTube channel to access this quiz. Click the button below and subscribe:</p>
+        <a href="https://www.youtube.com/YOUR_CHANNEL_LINK" target="_blank">
+            <button class="btn">Subscribe on YouTube</button>
+        </a>
         <p>After subscribing, click below to start:</p>
-        <button class="btn" onclick="unlockQuiz()">I subbed bro, now find me a wife.</button>
+        <button class="btn" onclick="startQuiz()">I Subscribed! Start Quiz</button>
     </div>
     
     <div class="quiz-container" id="quiz-container" style="display: none;">
@@ -113,7 +115,7 @@
         let countryScores = {};
         let userRegion, userClimate, userCulture, userLifestyle, userReligion, userRace;
 
-         const countries = {
+        const countries = {
     "Afghanistan": { region: "Asia", climate: "Diverse climates", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Islam", race: ["Asian (East/Southeast/South)"], divorceRate: 5, attractiveness: 70, education: 50, feminism: 10, language: "Pashto" },
     "Albania": { region: "Europe", climate: "Mild and rainy", culture: "Traditional and family-focused", lifestyle: "Balanced", religion: "Islam", race: ["European/White"], divorceRate: 20, attractiveness: 75, education: 60, feminism: 20, language: "Albanian" },
     "Algeria": { region: "Africa", climate: "Hot and dry", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Islam", race: ["Black/African/Caribbean", "Latina/Mediterranean/Middle Eastern"], divorceRate: 15, attractiveness: 72, education: 50, feminism: 30, language: "Arabic" },
