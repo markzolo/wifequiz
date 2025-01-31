@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Me a Wife Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .quiz-container {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+        h1 {
+            font-size: 1.8em;
+            text-align: center;
+        }
+        .question {
+            margin-bottom: 20px;
+        }
+        .options button {
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .options button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            display: none;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1>Find Me a Wife Quiz</h1>
+        <div class="question">
+            <h2 id="question-text">Question will appear here</h2>
+            <div class="options" id="options-container"></div>
+        </div>
+        <div class="result">
+            <h2 id="result-text">Your top 3 countries are:</h2>
+            <ul id="result-list"></ul>
+            <button class="restart" onclick="restartQuiz()">Restart Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            { text: "Where are you from?", options: ["North America", "Europe", "Asia", "Africa", "South America", "Oceania"] },
+            { text: "What climate do you prefer?", options: ["Warm and sunny", "Cold and snowy", "Mild and rainy", "Diverse climates"] },
+            { text: "What type of culture interests you most?", options: ["Traditional and family-focused", "Modern and independent", "Romantic and artistic", "Laid-back and social"] },
+            { text: "What lifestyle do you envision?", options: ["Quiet and rural", "Active and urban", "Balanced", "Adventurous"] },
+            { text: "What is your religious background?", options: ["Christianity", "Islam", "Hinduism", "Buddhism", "Judaism", "Atheism", "Other"] },
+            { text: "What race do you find most attractive?", options: ["European/White", "Black/African/Caribbean", "Asian (East/Southeast/South)", "Latina/Mediterranean/Middle Eastern", "Mixed/No Preference"] }
+        ];
+
+        let currentQuestionIndex = 0;
+        let countryScores = {};
+        let userRegion, userClimate, userCulture, userLifestyle, userReligion, userRace;
+
+         const countries = {
+    "Afghanistan": { region: "Asia", climate: "Diverse climates", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Islam", race: ["Asian (East/Southeast/South)"], divorceRate: 5, attractiveness: 70, education: 50, feminism: 10, language: "Pashto" },
+    "Albania": { region: "Europe", climate: "Mild and rainy", culture: "Traditional and family-focused", lifestyle: "Balanced", religion: "Islam", race: ["European/White"], divorceRate: 20, attractiveness: 75, education: 60, feminism: 20, language: "Albanian" },
+    "Algeria": { region: "Africa", climate: "Hot and dry", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Islam", race: ["Black/African/Caribbean", "Latina/Mediterranean/Middle Eastern"], divorceRate: 15, attractiveness: 72, education: 50, feminism: 30, language: "Arabic" },
+    "Andorra": { region: "Europe", climate: "Cold and snowy", culture: "Modern and independent", lifestyle: "Active and urban", religion: "Christianity", race: ["European/White"], divorceRate: 40, attractiveness: 75, education: 70, feminism: 60, language: "Catalan" },
+    "Angola": { region: "Africa", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Christianity", race: ["Black/African/Caribbean"], divorceRate: 18, attractiveness: 68, education: 40, feminism: 25, language: "Portuguese" },
+    "Argentina": { region: "South America", climate: "Diverse climates", culture: "Romantic and artistic", lifestyle: "Active and urban", religion: "Christianity", race: ["Latina/Mediterranean/Middle Eastern", "European/White"], divorceRate: 35, attractiveness: 85, education: 70, feminism: 50, language: "Spanish" },
+    "Armenia": { region: "Asia", climate: "Mild and rainy", culture: "Traditional and family-focused", lifestyle: "Balanced", religion: "Christianity", race: ["European/White", "Latina/Mediterranean/Middle Eastern"], divorceRate: 25, attractiveness: 70, education: 60, feminism: 40, language: "Armenian" },
+    "Australia": { region: "Oceania", climate: "Diverse climates", culture: "Modern and independent", lifestyle: "Active and urban", religion: "Christianity", race: ["European/White"], divorceRate: 40, attractiveness: 88, education: 85, feminism: 70, language: "English" },
+    "Austria": { region: "Europe", climate: "Mild and rainy", culture: "Romantic and artistic", lifestyle: "Balanced", religion: "Christianity", race: ["European/White"], divorceRate: 45, attractiveness: 84, education: 80, feminism: 60, language: "German" },
+    "Azerbaijan": { region: "Asia", climate: "Diverse climates", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Islam", race: ["Asian (East/Southeast/South)", "Latina/Mediterranean/Middle Eastern", "European/White"], divorceRate: 25, attractiveness: 70, education: 60, feminism: 30, language: "Azerbaijani" },
+    "Bahamas": { region: "North America", climate: "Warm and sunny", culture: "Laid-back and social", lifestyle: "Relaxed and rural", religion: "Christianity", race: ["Black/African/Caribbean"], divorceRate: 28, attractiveness: 78, education: 60, feminism: 50, language: "English" },
+"Bangladesh": { region: "Asia", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Islam", race: ["Asian (East/Southeast/South)"], divorceRate: 10, attractiveness: 65, education: 55, feminism: 20, language: "Bengali" },
+"Barbados": { region: "North America", climate: "Warm and sunny", culture: "Laid-back and social", lifestyle: "Balanced", religion: "Christianity", race: ["Black/African/Caribbean"], divorceRate: 25, attractiveness: 80, education: 70, feminism: 60, language: "English" },
+"Belarus": { region: "Europe", climate: "Cold and snowy", culture: "Traditional and family-focused", lifestyle: "Balanced", religion: "Christianity", race: ["European/White"], divorceRate: 50, attractiveness: 78, education: 80, feminism: 40, language: "Belarusian, Russian" },
+"Belgium": { region: "Europe", climate: "Mild and rainy", culture: "Modern and independent", lifestyle: "Active and urban", religion: "Christianity", divorceRate: 50, attractiveness: 78, education: 80, feminism: 60, language: "Dutch, French, German", race: ["European/White"] },
+"Benin": { region: "Africa", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Christianity", divorceRate: 10, attractiveness: 60, education: 50, feminism: 20, language: "French", race: ["Black/African/Caribbean"] },
+"Bhutan": { region: "Asia", climate: "Mild and rainy", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Buddhism", divorceRate: 15, attractiveness: 80, education: 60, feminism: 35, language: "Dzongkha", race: ["Asian (East/Southeast/South)"] },
+"Bolivia": { region: "South America", climate: "Diverse climates", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Christianity", divorceRate: 20, attractiveness: 70, education: 60, feminism: 40, language: "Spanish", race: ["Latina/Mediterranean/Middle Eastern"] },
+"Bosnia and Herzegovina": { region: "Europe", climate: "Mild and rainy", culture: "Traditional and family-focused", lifestyle: "Balanced", religion: ["Islam", "Christianity"], divorceRate: 40, attractiveness: 75, education: 70, feminism: 30, language: "Bosnian, Croatian, Serbian", race: ["European/White", "Latina/Mediterranean/Middle Eastern"] },
+"Botswana": { region: "Africa", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Christianity", divorceRate: 12, attractiveness: 65, education: 60, feminism: 25, language: "English, Setswana", race: ["Black/African/Caribbean"] },
+"Brazil": { region: "South America", climate: "Warm and sunny", culture: "Romantic and artistic", lifestyle: "Active and urban", religion: "Christianity", divorceRate: 40, attractiveness: 82, education: 70, feminism: 55, language: "Portuguese", race: ["Latina/Mediterranean/Middle Eastern", "Black/African/Caribbean"] },
+"Brunei": { region: "Asia", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Islam", divorceRate: 15, attractiveness: 75, education: 70, feminism: 35, language: "Malay", race: ["Asian (East/Southeast/South)"] },
+"Bulgaria": { region: "Europe", climate: "Mild and rainy", culture: "Traditional and family-focused", lifestyle: "Balanced", religion: "Christianity", divorceRate: 45, attractiveness: 77, education: 70, feminism: 30, language: "Bulgarian", race: ["European/White"] },
+"Burkina Faso": { region: "Africa", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: ["Islam", "Christianity"], divorceRate: 12, attractiveness: 65, education: 50, feminism: 20, language: "French", race: ["Black/African/Caribbean"] },
+"Burundi": { region: "Africa", climate: "Mild and rainy", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Christianity", divorceRate: 18, attractiveness: 60, education: 40, feminism: 20, language: "Kirundi, French, English", race: ["Black/African/Caribbean"] },
+"Cabo Verde": { region: "Africa", climate: "Warm and sunny", culture: "Laid-back and social", lifestyle: "Balanced", religion: "Christianity", divorceRate: 30, attractiveness: 72, education: 65, feminism: 50, language: "Portuguese", race: ["Black/African/Caribbean"] },
+"Cambodia": { region: "Asia", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Buddhism", divorceRate: 20, attractiveness: 70, education: 60, feminism: 35, language: "Khmer", race: ["Asian (East/Southeast/South)"] },
+"Cameroon": { region: "Africa", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: ["Christianity", "Islam"], divorceRate: 15, attractiveness: 70, education: 55, feminism: 25, language: "French, English", race: ["Black/African/Caribbean"] },
+"Canada": { region: "North America", climate: "Cold and snowy", culture: "Modern and independent", lifestyle: "Active and urban", religion: "Christianity", divorceRate: 38, attractiveness: 84, education: 90, feminism: 75, language: "English, French", race: ["European/White", "Black/African/Caribbean"] },
+"Central African Republic": { region: "Africa", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: ["Christianity", "Islam"], divorceRate: 8, attractiveness: 60, education: 40, feminism: 20, language: "French", race: ["Black/African/Caribbean"] },
+"Chad": { region: "Africa", climate: "Hot and dry", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: ["Islam", "Christianity"], divorceRate: 12, attractiveness: 60, education: 50, feminism: 15, language: "French, Arabic", race: ["Black/African/Caribbean"] },
+"Chile": { region: "South America", climate: "Diverse climates", culture: "Traditional and family-focused", lifestyle: "Balanced", religion: "Christianity", divorceRate: 30, attractiveness: 80, education: 75, feminism: 50, language: "Spanish", race: ["Latina/Mediterranean/Middle Eastern", "European/White"] },
+"China": { region: "Asia", climate: "Diverse climates", culture: "Traditional and family-focused", lifestyle: "Active and urban", religion: "Other", divorceRate: 30, attractiveness: 75, education: 80, feminism: 45, language: "Mandarin", race: ["Asian (East/Southeast/South)"] },
+"Colombia": { region: "South America", climate: "Warm and sunny", culture: "Laid-back and social", lifestyle: "Active and urban", religion: "Christianity", divorceRate: 32, attractiveness: 78, education: 60, feminism: 50, language: "Spanish", race: ["Latina/Mediterranean/Middle Eastern", "European/White"] },
+"Comoros": { region: "Africa", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Islam", divorceRate: 10, attractiveness: 60, education: 50, feminism: 20, language: "Comorian, French, Arabic", race: ["Black/African/Caribbean"] },
+"Congo (Republic of the)": { region: "Africa", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Christianity", divorceRate: 18, attractiveness: 65, education: 50, feminism: 25, language: "French", race: ["Black/African/Caribbean"] },
+"Congo (Democratic Republic of the)": { region: "Africa", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: ["Christianity", "Islam"], divorceRate: 10, attractiveness: 60, education: 40, feminism: 20, language: "French", race: ["Black/African/Caribbean"] },
+"Costa Rica": { region: "North America", climate: "Warm and sunny", culture: "Laid-back and social", lifestyle: "Balanced", religion: "Christianity", divorceRate: 30, attractiveness: 82, education: 75, feminism: 55, language: "Spanish", race: ["Latina/Mediterranean/Middle Eastern"] },
+"Croatia": { region: "Europe", climate: "Mild and rainy", culture: "Traditional and family-focused", lifestyle: "Balanced", religion: "Christianity", divorceRate: 38, attractiveness: 80, education: 75, feminism: 40, language: "Croatian", race: ["European/White"] },
+"Cuba": { region: "North America", climate: "Warm and sunny", culture: "Laid-back and social", lifestyle: "Balanced", religion: "Christianity", divorceRate: 28, attractiveness: 81, education: 70, feminism: 50, language: "Spanish", race: ["Latina/Mediterranean/Middle Eastern", "Black/African/Caribbean"] },
+"Cyprus": { region: "Europe", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Balanced", religion: "Christianity", divorceRate: 25, attractiveness: 79, education: 75, feminism: 45, language: "Greek, Turkish", race: ["European/White"] },
+"Czech Republic": { region: "Europe", climate: "Mild and rainy", culture: "Modern and independent", lifestyle: "Active and urban", religion: "Atheism", divorceRate: 50, attractiveness: 83, education: 80, feminism: 60, language: "Czech", race: ["European/White"] },
+    "Denmark": { region: "Europe", climate: "Mild and rainy", culture: "Progressive and egalitarian", lifestyle: "Active and urban", religion: "Christianity", divorceRate: 45, attractiveness: 85, education: 85, feminism: 75, language: "Danish", race: ["European/White"] },
+    "Djibouti": { region: "Africa", climate: "Hot and dry", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Islam", divorceRate: 12, attractiveness: 60, education: 50, feminism: 25, language: "Arabic, French", race: ["Black/African/Caribbean"] },
+    "Dominica": { region: "North America", climate: "Warm and sunny", culture: "Laid-back and social", lifestyle: "Balanced", religion: "Christianity", divorceRate: 22, attractiveness: 74, education: 65, feminism: 45, language: "English", race: ["Black/African/Caribbean"] },
+    "Dominican Republic": { region: "North America", climate: "Warm and sunny", culture: "Laid-back and social", lifestyle: "Balanced", religion: "Christianity", divorceRate: 28, attractiveness: 78, education: 60, feminism: 50, language: "Spanish", race: ["Latina/Mediterranean/Middle Eastern", "Black/African/Caribbean"] },
+    "Ecuador": { region: "South America", climate: "Diverse climates", culture: "Traditional and family-focused", lifestyle: "Balanced", religion: "Christianity", divorceRate: 25, attractiveness: 79, education: 70, feminism: 45, language: "Spanish", race: ["Latina/Mediterranean/Middle Eastern"] },
+    "Egypt": { region: "Africa", climate: "Hot and dry", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Islam", divorceRate: 25, attractiveness: 70, education: 60, feminism: 30, language: "Arabic", race: ["Latina/Mediterranean/Middle Eastern"] },
+    "El Salvador": { region: "North America", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Balanced", religion: "Christianity", divorceRate: 27, attractiveness: 75, education: 60, feminism: 40, language: "Spanish", race: ["Latina/Mediterranean/Middle Eastern"] },
+    "Equatorial Guinea": { region: "Africa", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Christianity", divorceRate: 20, attractiveness: 65, education: 50, feminism: 25, language: "Spanish, French, Portuguese", race: ["Black/African/Caribbean"] },
+    "Eritrea": { region: "Africa", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Christianity, Islam", divorceRate: 10, attractiveness: 60, education: 50, feminism: 20, language: "Tigrinya, Arabic", race: ["Black/African/Caribbean"] },
+    "Estonia": { region: "Europe", climate: "Cold and snowy", culture: "Modern and independent", lifestyle: "Active and urban", religion: "Atheism", divorceRate: 40, attractiveness: 82, education: 85, feminism: 65, language: "Estonian", race: ["European/White"] },
+    "Eswatini": { region: "Africa", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Christianity", divorceRate: 15, attractiveness: 70, education: 50, feminism: 25, language: "English, siSwati", race: ["Black/African/Caribbean"] },
+    "Ethiopia": { region: "Africa", climate: "Diverse climates", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Christianity, Islam", divorceRate: 15, attractiveness: 75, education: 45, feminism: 20, language: "Amharic", race: ["Black/African/Caribbean"] },
+    "Fiji": { region: "Oceania", climate: "Warm and sunny", culture: "Laid-back and social", lifestyle: "Balanced", religion: "Christianity", divorceRate: 25, attractiveness: 80, education: 65, feminism: 40, language: "Fijian, English", race: ["Asian (East/Southeast/South)"] },
+    "Finland": { region: "Europe", climate: "Cold and snowy", culture: "Modern and independent", lifestyle: "Active and urban", religion: "Atheism", divorceRate: 45, attractiveness: 86, education: 90, feminism: 80, language: "Finnish, Swedish", race: ["European/White"] },
+    "France": { region: "Europe", climate: "Mild and rainy", culture: "Romantic and artistic", lifestyle: "Active and urban", religion: "Christianity", divorceRate: 55, attractiveness: 90, education: 85, feminism: 70, language: "French", race: ["European/White", "Latina/Mediterranean/Middle Eastern"] },
+    "Gabon": { region: "Africa", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Christianity", divorceRate: 20, attractiveness: 65, education: 50, feminism: 30, language: "French", race: ["Black/African/Caribbean"] },
+    "Gambia": { region: "Africa", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Islam", divorceRate: 18, attractiveness: 60, education: 50, feminism: 20, language: "English", race: ["Black/African/Caribbean"] },
+    "Georgia": { region: "Asia", climate: "Mild and rainy", culture: "Traditional and family-focused", lifestyle: "Balanced", religion: "Christianity", divorceRate: 30, attractiveness: 80, education: 70, feminism: 40, language: "Georgian", race: ["European/White"] },
+    "Germany": { region: "Europe", climate: "Mild and rainy", culture: "Modern and independent", lifestyle: "Active and urban", religion: "Christianity", divorceRate: 40, attractiveness: 85, education: 90, feminism: 65, language: "German", race: ["European/White"] },
+    "Ghana": { region: "Africa", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Christianity, Islam", divorceRate: 15, attractiveness: 70, education: 60, feminism: 30, language: "English", race: ["Black/African/Caribbean"] },
+    "Greece": { region: "Europe", climate: "Warm and sunny", culture: "Romantic and artistic", lifestyle: "Balanced", religion: "Christianity", divorceRate: 35, attractiveness: 87, education: 80, feminism: 55, language: "Greek", race: ["European/White"] },
+    "Grenada": { region: "North America", climate: "Warm and sunny", culture: "Laid-back and social", lifestyle: "Balanced", religion: "Christianity", divorceRate: 20, attractiveness: 75, education: 60, feminism: 45, language: "English", race: ["Black/African/Caribbean"] },
+    "Guatemala": { region: "North America", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Balanced", religion: "Christianity", divorceRate: 25, attractiveness: 73, education: 60, feminism: 40, language: "Spanish", race: ["Latina/Mediterranean/Middle Eastern"] },
+    "Guinea": { region: "Africa", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Islam", divorceRate: 10, attractiveness: 60, education: 40, feminism: 20, language: "French", race: ["Black/African/Caribbean"] },
+    "Guinea-Bissau": { region: "Africa", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Islam, Christianity", divorceRate: 10, attractiveness: 60, education: 40, feminism: 20, language: "Portuguese", race: ["Black/African/Caribbean"] },
+    "Guyana": { region: "South America", climate: "Warm and sunny", culture: "Laid-back and social", lifestyle: "Balanced", religion: "Christianity", divorceRate: 30, attractiveness: 75, education: 65, feminism: 40, language: "English",  race: ["Black/African/Caribbean", "Asian (East/Southeast/South)"],  },
+    "Haiti": { region: "North America", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Christianity", divorceRate: 22, attractiveness: 70, education: 50, feminism: 25, language: "Haitian Creole, French", race: ["Black/African/Caribbean"] },
+    "Honduras": { region: "North America", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Christianity", divorceRate: 30, attractiveness: 73, education: 55, feminism: 40, language: "Spanish", race: ["Latina/Mediterranean/Middle Eastern"] },
+    "Hungary": { region: "Europe", climate: "Mild and rainy", culture: "Modern and independent", lifestyle: "Active and urban", religion: "Christianity", divorceRate: 45, attractiveness: 80, education: 75, feminism: 60, language: "Hungarian", race: ["European/White"] },
+    "Iceland": { region: "Europe", climate: "Cold and snowy", culture: "Modern and independent", lifestyle: "Active and urban", religion: "Atheism", divorceRate: 40, attractiveness: 88, education: 90, feminism: 80, language: "Icelandic", race: ["European/White"] },
+    "India": { region: "Asia", climate: "Diverse climates", culture: "Traditional and family-focused", lifestyle: "Active and urban", religion: "Hinduism, Islam, Christianity", divorceRate: 13, attractiveness: 80, education: 70, feminism: 40, language: "Hindi, English", race: ["Asian (East/Southeast/South)"] },
+    "Indonesia": { region: "Asia", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Balanced", religion: "Islam", divorceRate: 15, attractiveness: 78, education: 65, feminism: 30, language: "Indonesian", race: ["Asian (East/Southeast/South)"] },
+    "Iran": { region: "Asia", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Balanced", religion: "Islam", divorceRate: 30, attractiveness: 75, education: 70, feminism: 35, language: "Persian", race: ["Latina/Mediterranean/Middle Eastern"] },
+    "Iraq": { region: "Asia", climate: "Hot and dry", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Islam", divorceRate: 18, attractiveness: 65, education: 50, feminism: 25, language: "Arabic", race: ["Latina/Mediterranean/Middle Eastern"] },
+"Ireland": { region: "Europe", climate: "Mild and rainy", culture: "Traditional and family-focused", lifestyle: "Active and urban", religion: "Christianity", divorceRate: 40, attractiveness: 85, education: 80, feminism: 70, language: "English, Irish", race: ["European/White"] },
+"Israel": { region: "Asia", climate: "Hot and dry", culture: "Modern and independent", lifestyle: "Active and urban", religion: "Judaism", divorceRate: 40, attractiveness: 90, education: 85, feminism: 60, language: "Hebrew", race: ["European/White", "Middle Eastern"] },
+    "Italy": { region: "Europe", climate: "Mild and rainy", culture: "Romantic and artistic", lifestyle: "Balanced", religion: "Christianity", divorceRate: 40, attractiveness: 90, education: 85, feminism: 60, language: "Italian", race: ["European/White"] },
+    "Jamaica": { region: "North America", climate: "Warm and sunny", culture: "Laid-back and social", lifestyle: "Active and urban", religion: "Christianity", divorceRate: 28, attractiveness: 80, education: 60, feminism: 50, language: "English", race: ["Black/African/Caribbean"] },
+    "Japan": { region: "Asia", climate: "Diverse climates", culture: "Traditional and family-focused", lifestyle: "Active and urban", religion: "Shintoism, Buddhism", divorceRate: 25, attractiveness: 90, education: 85, feminism: 40, language: "Japanese", race: ["Asian (East/Southeast/South)"] },
+    "Jordan": { region: "Asia", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Islam", divorceRate: 20, attractiveness: 75, education: 70, feminism: 30, language: "Arabic", race: ["Latina/Mediterranean/Middle Eastern"] },
+    "Kazakhstan": { region: "Asia", climate: "Diverse climates", culture: "Traditional and family-focused", lifestyle: "Balanced", religion: "Islam", divorceRate: 25, attractiveness: 80, education: 70, feminism: 35, language: "Kazakh, Russian", race: ["Asian (East/Southeast/South)", "Latina/Mediterranean/Middle Eastern"] },
+    "Kenya": { region: "Africa", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Christianity, Islam", divorceRate: 15, attractiveness: 70, education: 60, feminism: 25, language: "Swahili, English", race: ["Black/African/Caribbean"] },
+     "Korea, North": { region: "Asia", climate: "Cold and snowy", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Other", divorceRate: 10, attractiveness: 65, education: 60, feminism: 15, language: "Korean", race: ["Asian (East/Southeast/South)"] },
+    "Korea, South": { region: "Asia", climate: "Diverse climates", culture: "Modern and independent", lifestyle: "Active and urban", religion: "Christianity, Buddhism", divorceRate: 40, attractiveness: 85, education: 80, feminism: 60, language: "Korean", race: ["Asian (East/Southeast/South)"] },
+    "Kuwait": { region: "Asia", climate: "Hot and dry", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Islam", divorceRate: 20, attractiveness: 75, education: 70, feminism: 30, language: "Arabic", race: ["Latina/Mediterranean/Middle Eastern"] },
+    "Kyrgyzstan": { region: "Asia", climate: "Mild and rainy", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Islam", divorceRate: 20, attractiveness: 70, education: 55, feminism: 25, language: "Kyrgyz, Russian", race: ["Asian (East/Southeast/South)"] },
+    "Laos": { region: "Asia", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Buddhism", divorceRate: 10, attractiveness: 70, education: 60, feminism: 20, language: "Lao", race: ["Asian (East/Southeast/South)"] },
+    "Latvia": { region: "Europe", climate: "Cold and snowy", culture: "Modern and independent", lifestyle: "Active and urban", religion: "Christianity", divorceRate: 45, attractiveness: 80, education: 75, feminism: 60, language: "Latvian", race: ["European/White"] },
+    "Lebanon": { region: "Asia", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Balanced", religion: "Islam, Christianity", divorceRate: 25, attractiveness: 80, education: 75, feminism: 45, language: "Arabic, French, English", race: ["Latina/Mediterranean/Middle Eastern"] },
+     "Liberia": { region: "Africa", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Christianity", divorceRate: 18, attractiveness: 65, education: 45, feminism: 25, language: "English", race: ["Black/African/Caribbean"] },
+    "Libya": { region: "Africa", climate: "Hot and dry", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Islam", divorceRate: 20, attractiveness: 70, education: 50, feminism: 30, language: "Arabic", race: ["Latina/Mediterranean/Middle Eastern"] },
+    "Liechtenstein": { region: "Europe", climate: "Cold and snowy", culture: "Modern and independent", lifestyle: "Active and urban", religion: "Christianity", divorceRate: 30, attractiveness: 85, education: 80, feminism: 60, language: "German", race: ["European/White"] },
+    "Lithuania": { region: "Europe", climate: "Cold and snowy", culture: "Modern and independent", lifestyle: "Active and urban", religion: "Christianity", divorceRate: 40, attractiveness: 80, education: 75, feminism: 60, language: "Lithuanian", race: ["European/White"] },
+    "Luxembourg": { region: "Europe", climate: "Mild and rainy", culture: "Modern and independent", lifestyle: "Active and urban", religion: "Christianity", divorceRate: 35, attractiveness: 85, education: 85, feminism: 70, language: "Luxembourgish, French, German", race: ["European/White"] },
+    "Madagascar": { region: "Africa", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Christianity, Islam", divorceRate: 12, attractiveness: 70, education: 50, feminism: 20, language: "Malagasy, French", race: ["Black/African/Caribbean"] },
+    "Malawi": { region: "Africa", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Christianity, Islam", divorceRate: 12, attractiveness: 65, education: 45, feminism: 15, language: "Chichewa, English", race: ["Black/African/Caribbean"] },
+    "Malaysia": { region: "Asia", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Active and urban", religion: "Islam", divorceRate: 25, attractiveness: 78, education: 75, feminism: 50, language: "Malay", race: ["Asian (East/Southeast/South)"] },
+    "Maldives": { region: "Asia", climate: "Warm and sunny", culture: "Laid-back and social", lifestyle: "Balanced", religion: "Islam", divorceRate: 28, attractiveness: 90, education: 70, feminism: 40, language: "Dhivehi",race: ["Asian (East/Southeast/South)"] },
+    "Mali": { region: "Africa", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Islam", divorceRate: 10, attractiveness: 60, education: 40, feminism: 20, language: "French", race: ["Black/African/Caribbean"] },
+    "Malta": { region: "Europe", climate: "Warm and sunny", culture: "Laid-back and social", lifestyle: "Balanced", religion: "Christianity", divorceRate: 25, attractiveness: 80, education: 75, feminism: 50, language: "Maltese, English", race: ["European/White"] },
+    "Mauritania": { region: "Africa", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Islam", divorceRate: 10, attractiveness: 65, education: 45, feminism: 20, language: "Arabic", race: ["Latina/Mediterranean/Middle Eastern"] },
+    "Mauritius": { region: "Africa", climate: "Warm and sunny", culture: "Laid-back and social", lifestyle: "Balanced", religion: "Hinduism, Christianity", divorceRate: 30, attractiveness: 80, education: 75, feminism: 50, language: "English, French", race: ["Asian (East/Southeast/South)"] },
+    "Mexico": { region: "North America", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Balanced", religion: "Christianity", divorceRate: 30, attractiveness: 82, education: 70, feminism: 50, language: "Spanish", race: ["Latina/Mediterranean/Middle Eastern"] },
+    "Moldova": { region: "Europe", climate: "Mild and rainy", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Christianity", divorceRate: 35, attractiveness: 70, education: 60, feminism: 40, language: "Romanian",  race: ["European/White"] },
+    "Mongolia": { region: "Asia", climate: "Diverse climates", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Buddhism", divorceRate: 25, attractiveness: 70, education: 60, feminism: 30, language: "Mongolian", race: ["Asian (East/Southeast/South)"] },
+    "Montenegro": { region: "Europe", climate: "Mild and rainy", culture: "Traditional and family-focused", lifestyle: "Balanced", religion: "Christianity", divorceRate: 35, attractiveness: 80, education: 70, feminism: 50, language: "Montenegrin", race: ["European/White"] },
+    "Morocco": { 
+        region: "Africa", 
+        climate: "Warm and sunny", 
+        culture: "Traditional and family-focused", 
+        lifestyle: "Quiet and rural", 
+        religion: "Islam", 
+        divorceRate: 18, 
+        attractiveness: 75, 
+        education: 60, 
+        feminism: 40, 
+        language: "Arabic, Berber", 
+        race: ["Latina/Mediterranean/Middle Eastern"] 
+    },
+    "Mozambique": { 
+        region: "Africa", 
+        climate: "Warm and sunny", 
+        culture: "Traditional and family-focused", 
+        lifestyle: "Quiet and rural", 
+        religion: "Christianity", 
+        divorceRate: 12, 
+        attractiveness: 70, 
+        education: 50, 
+        feminism: 25, 
+        language: "Portuguese", 
+        race: ["Black/African/Caribbean"]
+    },
+    "Myanmar": { 
+        region: "Asia", 
+        climate: "Warm and sunny", 
+        culture: "Traditional and family-focused", 
+        lifestyle: "Quiet and rural", 
+        religion: "Buddhism", 
+        divorceRate: 12, 
+        attractiveness: 70, 
+        education: 50, 
+        feminism: 20, 
+        language: "Burmese", 
+        race: ["Asian (East/Southeast/South)"]
+    },
+    "Namibia": { 
+        region: "Africa", 
+        climate: "Warm and sunny", 
+        culture: "Traditional and family-focused", 
+        lifestyle: "Quiet and rural", 
+        religion: "Christianity", 
+        divorceRate: 18, 
+        attractiveness: 70, 
+        education: 55, 
+        feminism: 30, 
+        language: "English", 
+        race: ["Black/African/Caribbean"]
+    },
+    "Nepal": { 
+        region: "Asia", 
+        climate: "Diverse climates", 
+        culture: "Traditional and family-focused", 
+        lifestyle: "Quiet and rural", 
+        religion: "Hinduism, Buddhism", 
+        divorceRate: 10, 
+        attractiveness: 75, 
+        education: 55, 
+        feminism: 25, 
+        language: "Nepali", 
+        race: ["Asian (East/Southeast/South)"]
+    },
+    "Nigeria": { 
+        region: "Africa", 
+        climate: "Warm and sunny", 
+        culture: "Traditional and family-focused", 
+        lifestyle: "Active and urban", 
+        religion: "Islam, Christianity", 
+        divorceRate: 15, 
+        attractiveness: 78, 
+        education: 60, 
+        feminism: 30, 
+        language: "English", 
+        race: ["Black/African/Caribbean"]
+    },
+    "Pakistan": { 
+        region: "Asia", 
+        climate: "Diverse climates", 
+        culture: "Traditional and family-focused", 
+        lifestyle: "Balanced", 
+        religion: "Islam", 
+        divorceRate: 14, 
+        attractiveness: 75, 
+        education: 60, 
+        feminism: 30, 
+        language: "Urdu", 
+        race: ["Asian (East/Southeast/South)"]
+    },
+    "Philippines": { 
+        region: "Asia", 
+        climate: "Warm and sunny", 
+        culture: "Laid-back and social", 
+        lifestyle: "Balanced", 
+        religion: "Christianity", 
+        divorceRate: 25, 
+        attractiveness: 80, 
+        education: 70, 
+        feminism: 50, 
+        language: "Filipino, English", 
+        race: ["Asian (East/Southeast/South)"]
+    },
+    "South Africa": { 
+        region: "Africa", 
+        climate: "Warm and sunny", 
+        culture: "Modern and independent", 
+        lifestyle: "Active and urban", 
+        religion: "Christianity", 
+        divorceRate: 40, 
+        attractiveness: 85, 
+        education: 75, 
+        feminism: 65, 
+        language: "English, Afrikaans, Zulu", 
+        race: ["Black/African/Caribbean"]
+    },
+    "South Korea": { 
+        region: "Asia", 
+        climate: "Mild and rainy", 
+        culture: "Modern and independent", 
+        lifestyle: "Active and urban", 
+        religion: "Christianity, Buddhism", 
+        divorceRate: 50, 
+        attractiveness: 90, 
+        education: 90, 
+        feminism: 60, 
+        language: "Korean", 
+        race: ["Asian (East/Southeast/South)"]
+    },
+    "Sudan": { 
+        region: "Africa", 
+        climate: "Hot and dry", 
+        culture: "Traditional and family-focused", 
+        lifestyle: "Quiet and rural", 
+        religion: "Islam", 
+        divorceRate: 12, 
+        attractiveness: 70, 
+        education: 55, 
+        feminism: 25, 
+        language: "Arabic", 
+        race: ["Black/African/Caribbean"]
+    },
+    "Suriname": { region: "South America", climate: "Warm and sunny", culture: "Laid-back and social", lifestyle: "Balanced", religion: "Christianity", divorceRate: 25, attractiveness: 75, education: 60, feminism: 45, language: "Dutch", race: ["Black/African/Caribbean"] },
+    "Sweden": { region: "Europe", climate: "Cold and snowy", culture: "Modern and independent", lifestyle: "Active and urban", religion: "Christianity", divorceRate: 50, attractiveness: 90, education: 95, feminism: 85, language: "Swedish", race: ["European/White"] },
+    "Switzerland": { region: "Europe", climate: "Cold and snowy", culture: "Modern and independent", lifestyle: "Active and urban", religion: "Christianity", divorceRate: 45, attractiveness: 90, education: 95, feminism: 80, language: "German, French, Italian, Romansh", race: ["European/White"] },
+    "Syria": { region: "Asia", climate: "Hot and dry", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Islam", divorceRate: 15, attractiveness: 70, education: 50, feminism: 25, language: "Arabic", race: ["Latina/Mediterranean/Middle Eastern"] },
+    "Taiwan": { region: "Asia", climate: "Mild and rainy", culture: "Modern and independent", lifestyle: "Active and urban", religion: "Buddhism, Taoism, Christianity", divorceRate: 40, attractiveness: 85, education: 90, feminism: 70, language: "Mandarin", race: ["Asian (East/Southeast/South)"] },
+    "Tanzania": { region: "Africa", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Christianity, Islam", divorceRate: 15, attractiveness: 70, education: 50, feminism: 30, language: "Swahili, English", race: ["Black/African/Caribbean"] },
+    "Thailand": { region: "Asia", climate: "Warm and sunny", culture: "Laid-back and social", lifestyle: "Active and urban", religion: "Buddhism", divorceRate: 30, attractiveness: 85, education: 70, feminism: 55, language: "Thai", race: ["Asian (East/Southeast/South)"] },
+    "Tunisia": { region: "Africa", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Active and urban", religion: "Islam", divorceRate: 30, attractiveness: 75, education: 70, feminism: 45, language: "Arabic, French", race: ["Latina/Mediterranean/Middle Eastern"] },
+    "Turkey": { region: "Asia", climate: "Mild and rainy", culture: "Romantic and artistic", lifestyle: "Active and urban", religion: "Islam", divorceRate: 40, attractiveness: 80, education: 70, feminism: 50, language: "Turkish", race: ["Latina/Mediterranean/Middle Eastern"] },
+    "United Arab Emirates": { region: "Asia", climate: "Hot and dry", culture: "Modern and independent", lifestyle: "Active and urban", religion: "Islam", divorceRate: 30, attractiveness: 90, education: 80, feminism: 40, language: "Arabic", race: ["Asian (East/Southeast/South)"] },
+    "United Kingdom": { region: "Europe", climate: "Mild and rainy", culture: "Modern and independent", lifestyle: "Active and urban", religion: "Christianity", divorceRate: 45, attractiveness: 85, education: 90, feminism: 75, language: "English", race: ["European/White"] },
+    "United States": { region: "North America", climate: "Diverse climates", culture: "Modern and independent", lifestyle: "Active and urban", religion: "Christianity", divorceRate: 50, attractiveness: 90, education: 85, feminism: 70, language: "English", race: ["European/White", "Black/African/Caribbean", "Latina/Mediterranean/Middle Eastern"] },
+    "Uruguay": { region: "South America", climate: "Mild and rainy", culture: "Laid-back and social", lifestyle: "Balanced", religion: "Christianity", divorceRate: 35, attractiveness: 80, education: 80, feminism: 60, language: "Spanish", race: ["European/White"] },
+    "Venezuela": { region: "South America", climate: "Warm and sunny", culture: "Laid-back and social", lifestyle: "Balanced", religion: "Christianity", divorceRate: 40, attractiveness: 80, education: 70, feminism: 50, language: "Spanish", race: ["Latina/Mediterranean/Middle Eastern"] },
+    "Vietnam": { region: "Asia", climate: "Warm and sunny", culture: "Laid-back and social", lifestyle: "Balanced", religion: "Buddhism, Christianity", divorceRate: 35, attractiveness: 75, education: 60, feminism: 45, language: "Vietnamese", race: ["Asian (East/Southeast/South)"] },
+    "Zambia": { region: "Africa", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Christianity", divorceRate: 15, attractiveness: 70, education: 55, feminism: 25, language: "English", race: ["Black/African/Caribbean"] },
+"Zimbabwe": { region: "Africa", climate: "Warm and sunny", culture: "Traditional and family-focused", lifestyle: "Quiet and rural", religion: "Christianity", divorceRate: 12, attractiveness: 70, education: 60, feminism: 30, language: "English, Shona, Ndebele", race: ["Black/African/Caribbean"] }
+	};
+
+        function loadQuestion() {
+            const question = questions[currentQuestionIndex];
+            document.getElementById('question-text').textContent = question.text;
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            question.options.forEach((option) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.onclick = () => selectAnswer(option);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function selectAnswer(option) {
+            if (currentQuestionIndex === 0) userRegion = option;
+            else if (currentQuestionIndex === 1) userClimate = option;
+            else if (currentQuestionIndex === 2) userCulture = option;
+            else if (currentQuestionIndex === 3) userLifestyle = option;
+            else if (currentQuestionIndex === 4) userReligion = option;
+            else if (currentQuestionIndex === 5) userRace = option;
+
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                calculateScores();
+                showResult();
+            }
+        }
+
+        function calculateScores() {
+            countryScores = {};
+            for (const country in countries) {
+                let score = 0;
+                const details = countries[country];
+
+                if (details.region === userRegion) score += 30;
+                if (details.climate === userClimate) score += 20;
+                if (details.culture === userCulture) score += 20;
+                if (details.lifestyle === userLifestyle) score += 20;
+                if (details.religion === userReligion) score += 30;
+
+                if (details.race.includes(userRace)) {
+                    score += 20;
+                } else if (userRace === "Mixed/No Preference") {
+                    score += 0;
+                }
+
+                score += (100 - details.divorceRate);
+                score += details.attractiveness;
+                score += details.education;
+                score -= details.feminism;
+
+                countryScores[country] = score;
+            }
+        }
+
+        function showResult() {
+            const sortedCountries = Object.keys(countryScores).sort((a, b) => countryScores[b] - countryScores[a]).slice(0, 3);
+            const resultList = document.getElementById('result-list');
+            resultList.innerHTML = '';
+            sortedCountries.forEach((country) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${country} (Score: ${countryScores[country]})`;
+                resultList.appendChild(listItem);
+            });
+            document.querySelector('.question').style.display = 'none';
+            document.querySelector('.result').style.display = 'block';
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            countryScores = {};
+            document.querySelector('.result').style.display = 'none';
+            document.querySelector('.question').style.display = 'block';
+            loadQuestion();
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
